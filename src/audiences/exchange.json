@@ -1,0 +1,16 @@
+{
+  "id": "exchange",
+  "label": "Exchange",
+  "description": "An exchange listing Stellar-based assets, typically running its own validator and/or Horizon/RPC infrastructure for deposit/withdrawal reliability.",
+  "typicalInfrastructure": [
+    "Self-run stellar-core, Horizon, and/or RPC nodes",
+    "Hot/cold wallet infrastructure interacting directly with the network",
+    "Automated deposit crediting based on ledger data"
+  ],
+  "questionsToAsk": [
+    "Have we scheduled the node/Horizon/RPC upgrade before the stated deadline?",
+    "Does this release change resource usage, fees, or behavior our deposit-crediting logic assumes?",
+    "Do we need to pause deposits/withdrawals during the upgrade window?"
+  ],
+  "whoToNotify": ["Infrastructure/SRE lead", "Security team", "Operations"]
+}

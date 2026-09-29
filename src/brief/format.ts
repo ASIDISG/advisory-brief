@@ -1,0 +1,65 @@
+import { AUDIENCES } from '../audiences/index';
+import { renderSourcesLine } from './sources-line';
+import type { VerifiedBrief } from './schema';
+
+function audienceLabel(id: string): string {
+  return AUDIENCES.find((a) => a.id === id)?.label ?? id;
+}
+
+/** Full Markdown rendering of a verified brief -- what "Copy as Markdown" puts on the
+ * clipboard. Every claim's text is shown; a claim marked `unknown` reads as "(unclear from
+ * the source)" rather than silently looking identical to a verified one. */
+export function toMarkdown(brief: VerifiedBrief): string {
+  const lines: string[] = [];
+
+  lines.push('## What happened');
+  for (const c of brief.whatHappened) lines.push(`- ${claimLine(c)}`);
+
+  lines.push('', `## Urgency: ${brief.urgency.level}`);
+  lines.push(claimLine(brief.urgency.reason));
+  if (brief.urgency.deadlines.length > 0) {
+    lines.push(`Deadlines: ${brief.urgency.deadlines.join(', ')}`);
+  }
+
+  lines.push('', '## Are you affected?');
+  for (const a of brief.affected) {
+    lines.push(`- **${audienceLabel(a.audienceId)}**: ${a.affected} — ${claimLine(a.explanation)}`);
+  }
+
+  lines.push('', '## What to tell your team');
+  for (const c of brief.whatToTellYourTeam) lines.push(`- ${claimLine(c)}`);
+
+  lines.push('', "## What we don't know");
+  for (const item of brief.whatWeDontKnow) lines.push(`- ${item}`);
+
+  lines.push(
+    '',
+    `## Verification`,
+    `${brief.verification.verifiedClaims}/${brief.verification.totalClaims} claims verified against the source.` +
+      (brief.verification.rejectedClaims > 0
+        ? ` ${brief.verification.rejectedClaims} unverifiable claim(s) were removed.`
+        : '')
+  );
+
+  lines.push('', renderSourcesLine(brief));
+
+  return lines.join('\n');
+}
+
+function claimLine(c: { text: string; unknown: boolean }): string {
+  return c.unknown ? `${c.text} *(unclear from the source)*` : c.text;
+}
+
+/** A shorter, flatter version for pasting into Slack -- no headings (Slack's mrkdwn doesn't
+ * render `##`), condensed to the sections a teammate skimming a channel actually needs. */
+export function toSlackMessage(brief: VerifiedBrief): string {
+  const lines: string[] = [];
+  lines.push(`*Urgency: ${brief.urgency.level}* — ${claimLine(brief.urgency.reason)}`);
+  if (brief.urgency.deadlines.length > 0) {
+    lines.push(`Deadline(s): ${brief.urgency.deadlines.join(', ')}`);
+  }
+  lines.push('');
+  for (const c of brief.whatToTellYourTeam) lines.push(`• ${claimLine(c)}`);
+  lines.push('', renderSourcesLine(brief));
+  return lines.join('\n');
+}

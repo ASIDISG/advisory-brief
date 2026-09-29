@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Advisory Brief
 
-## Getting Started
+Turn a Stellar security advisory or release announcement into a plain-language brief for
+**non-engineers** — business owners, compliance leads, and product managers at wallets,
+anchors, fintechs, and exchanges. Node operators already get advisories written for them;
+everyone downstream of a node operator gets protocol jargon and has to translate it under
+time pressure. This tool does that translation, with a hard constraint: it never states more
+than the source advisory actually says.
 
-First, run the development server:
+## Why this is grounded, not just summarized
+
+Most LLM summarizers will confidently restate, embellish, or hallucinate a plausible-sounding
+detail. This one is structurally prevented from doing that:
+
+- The model returns structured JSON, and every factual claim carries either a verbatim
+  `quote` (≤25 words) or an explicit `unknown: true` — never a bare, unverifiable assertion.
+- **Code, not the model, verifies every quote is a real substring of the source** (after
+  whitespace/case normalization). A claim that fails is stripped and counted in a
+  "verification" summary shown to the user, not hidden.
+- Any date must itself appear in the source text, or it's dropped from the brief.
+- `urgency` is a closed enum (`ACT_NOW` / `ACT_BEFORE_DEADLINE` / `MONITOR` / `NO_ACTION`),
+  validated with zod — the model can't invent a new severity label.
+
+See [`src/brief/grounding.ts`](src/brief/grounding.ts) for the actual enforcement.
+
+## Quickstart
 
 ```bash
+git clone https://github.com/stellarbrief/advisory-brief.git
+cd advisory-brief
+npm install
+cp .env.example .env   # add ANTHROPIC_API_KEY, or GEMINI_API_KEY for a free-tier alternative
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+No Anthropic access? Get a free `GEMINI_API_KEY` at [aistudio.google.com](https://aistudio.google.com) — no card required — and put it in `.env` instead. `app/api/brief/route.ts` uses whichever one is set.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open `http://localhost:3000`, click "Load a real example," and click "Generate brief."
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How it works
 
-## Learn More
+- `src/brief/schema.ts` — the `Claim` primitive and the full brief schema (zod).
+- `src/brief/grounding.ts` — the actual quote/date verification logic.
+- `src/brief/generate.ts` — provider-agnostic prompt construction and orchestration, using a
+  JSON Schema generated directly from the zod schema (so the model's contract and the
+  validation schema can never drift apart).
+- `src/brief/providers/` — the Anthropic and Gemini implementations, each using that SDK's own
+  real native structured-output feature
+  ([Anthropic](https://platform.claude.com/docs/en/build-with-claude/structured-outputs),
+  Gemini's `responseJsonSchema`) — not a tool-use/function-calling workaround.
+- `src/sources/` — one file per input source (`manual-paste`, GitHub Releases for
+  `stellar/stellar-core`), behind a common `AdvisorySource` interface. Adding a new source is
+  a small, self-contained file — see [`ADDING_A_SOURCE.md`](docs/ADDING_A_SOURCE.md).
+- `src/audiences/` — one JSON profile per audience (`wallet`, `anchor`, `fintech`,
+  `exchange`). Adding a new audience is adding one JSON file — see
+  [`ADDING_AN_AUDIENCE.md`](docs/ADDING_AN_AUDIENCE.md).
 
-To learn more about Next.js, take a look at the following resources:
+## Roadmap
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See [`ISSUES_BACKLOG.md`](ISSUES_BACKLOG.md) for ~20 scoped, ready-to-pick-up issues, and
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the fuller design writeup.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Contributing via Stellar Wave
 
-## Deploy on Vercel
+This repo is applying to the [Stellar Wave Program](https://docs.drips.network/wave/), where
+maintainers list scoped issues and outside contributors solve them for points. See
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the PR flow, and how issues are rated.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT — see [`LICENSE`](LICENSE).

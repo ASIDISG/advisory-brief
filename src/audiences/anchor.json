@@ -1,0 +1,16 @@
+{
+  "id": "anchor",
+  "label": "Anchor",
+  "description": "An SEP-24/SEP-31 anchor issuing or redeeming assets on/off the Stellar network on behalf of users.",
+  "typicalInfrastructure": [
+    "A Horizon or RPC endpoint (self-hosted or via a third-party provider)",
+    "Deposit/withdrawal automation that watches the ledger",
+    "Compliance/KYC tooling integrated with on-chain activity"
+  ],
+  "questionsToAsk": [
+    "Does our ledger-watching service depend on behavior this release changes?",
+    "Have we confirmed our node/RPC provider has applied this update?",
+    "Could this affect deposit/withdrawal confirmation timing?"
+  ],
+  "whoToNotify": ["Engineering lead", "Compliance officer", "Operations"]
+}

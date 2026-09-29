@@ -1,0 +1,16 @@
+{
+  "id": "fintech",
+  "label": "Fintech",
+  "description": "A fintech product that integrates Stellar for payments, remittance, or asset issuance but doesn't run core Stellar infrastructure itself.",
+  "typicalInfrastructure": [
+    "An SDK integration (e.g. the JS or Go Stellar SDK)",
+    "A third-party node/RPC provider",
+    "A payment processing pipeline that includes Stellar as one rail among several"
+  ],
+  "questionsToAsk": [
+    "Which of our vendors/providers are responsible for applying this update?",
+    "Have they confirmed they've done so?",
+    "Does this release change anything in the SDK surface area we depend on?"
+  ],
+  "whoToNotify": ["Engineering lead", "Product manager"]
+}

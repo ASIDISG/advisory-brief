@@ -1,0 +1,137 @@
+import { describe, expect, it } from 'vitest';
+import { normalizeForMatch, verifyBrief } from './grounding';
+import type { RawBrief } from './schema';
+import { RawBriefSchema, UrgencyLevel } from './schema';
+
+const SOURCE =
+  'A new security-focused Protocol 29 release is out, with the Testnet vote scheduled for ' +
+  'September 29th 1700 UTC and Mainnet on October 1st 1700 UTC. Stellar-core 29.0.0-3589.4eb833373 ' +
+  'fixes recently identified vulnerabilities, which to the best of our knowledge have not been ' +
+  'exploited.';
+
+function claim(text: string, quote: string | null, unknown = false) {
+  return { text, quote, unknown };
+}
+
+function minimalRawBrief(overrides: Partial<RawBrief> = {}): RawBrief {
+  const base: RawBrief = {
+    whatHappened: [claim('A new Protocol 29 release is out.', 'A new security-focused Protocol 29 release is out')],
+    urgency: {
+      level: 'ACT_BEFORE_DEADLINE',
+      reason: claim('There is a Mainnet vote deadline.', 'Mainnet on October 1st 1700 UTC'),
+      deadlines: ['October 1st 1700 UTC'],
+    },
+    affected: (['wallet', 'anchor', 'fintech', 'exchange'] as const).map((audienceId) => ({
+      audienceId,
+      affected: 'UNCLEAR' as const,
+      explanation: claim('Not enough information to say.', null, true),
+    })),
+    whatToTellYourTeam: [
+      claim('Review the release.', 'fixes recently identified vulnerabilities'),
+      claim('No known exploitation.', 'have not been exploited'),
+      claim('Deadline is Oct 1.', 'Mainnet on October 1st 1700 UTC'),
+    ],
+    whatWeDontKnow: ['The advisory does not describe the vulnerabilities themselves.'],
+  };
+  return { ...base, ...overrides };
+}
+
+describe('verifyBrief', () => {
+  it('keeps a claim whose quote is a real substring of the source', () => {
+    const result = verifyBrief(minimalRawBrief(), SOURCE, null, 'test');
+    expect(result.whatHappened[0].unknown).toBe(false);
+    expect(result.verification.rejectedClaims).toBe(0);
+    expect(result.verification.verifiedClaims).toBe(result.verification.totalClaims);
+  });
+
+  it('rejects a fabricated quote that never appears in the source', () => {
+    const raw = minimalRawBrief({
+      whatHappened: [claim('The sky is falling.', 'this text does not appear anywhere in the source')],
+    });
+    const result = verifyBrief(raw, SOURCE, null, 'test');
+    expect(result.whatHappened[0].unknown).toBe(true);
+    expect(result.whatHappened[0].text).toMatch(/could not be verified/);
+    expect(result.verification.rejectedClaims).toBe(1);
+  });
+
+  it('matches through whitespace and case normalization edge cases', () => {
+    const raw = minimalRawBrief({
+      whatHappened: [claim('Case/whitespace test.', 'STELLAR-CORE   29.0.0-3589.4EB833373\n\nFIXES')],
+    });
+    const result = verifyBrief(raw, SOURCE, null, 'test');
+    expect(result.whatHappened[0].unknown).toBe(false);
+  });
+
+  it('passes unknown claims through without requiring a source match', () => {
+    const result = verifyBrief(minimalRawBrief(), SOURCE, null, 'test');
+    // All four audience impacts in the fixture are marked unknown.
+    for (const a of result.affected) {
+      expect(a.explanation.unknown).toBe(true);
+    }
+    expect(result.verification.rejectedClaims).toBe(0);
+  });
+
+  it('drops a deadline date that does not appear in the source', () => {
+    const raw = minimalRawBrief({
+      urgency: {
+        level: 'ACT_BEFORE_DEADLINE',
+        reason: claim('Deadline exists.', 'Mainnet on October 1st 1700 UTC'),
+        deadlines: ['October 1st 1700 UTC', 'November 15th 2026'],
+      },
+    });
+    const result = verifyBrief(raw, SOURCE, null, 'test');
+    expect(result.urgency.deadlines).toEqual(['October 1st 1700 UTC']);
+    expect(result.verification.rejectedDates).toEqual(['November 15th 2026']);
+  });
+
+  it('keeps a deadline date that does appear in the source', () => {
+    const result = verifyBrief(minimalRawBrief(), SOURCE, null, 'test');
+    expect(result.urgency.deadlines).toEqual(['October 1st 1700 UTC']);
+    expect(result.verification.rejectedDates).toEqual([]);
+  });
+});
+
+describe('normalizeForMatch', () => {
+  it('collapses whitespace and lowercases', () => {
+    expect(normalizeForMatch('  Foo   Bar\n\nBaz  ')).toBe('foo bar baz');
+  });
+});
+
+describe('schema validation', () => {
+  it('rejects an urgency value outside the closed enum', () => {
+    expect(() => UrgencyLevel.parse('SUPER_URGENT')).toThrow();
+  });
+
+  it('accepts every real urgency value', () => {
+    for (const v of ['ACT_NOW', 'ACT_BEFORE_DEADLINE', 'MONITOR', 'NO_ACTION']) {
+      expect(() => UrgencyLevel.parse(v)).not.toThrow();
+    }
+  });
+
+  it('rejects a claim with both a quote and unknown: true', () => {
+    const parsed = RawBriefSchema.safeParse(minimalRawBrief({
+      whatHappened: [{ text: 'x', quote: 'y', unknown: true }],
+    }));
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects a claim with neither a quote nor unknown: true', () => {
+    const parsed = RawBriefSchema.safeParse(minimalRawBrief({
+      whatHappened: [{ text: 'x', quote: null, unknown: false }],
+    }));
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects a quote longer than 25 words', () => {
+    const longQuote = new Array(26).fill('word').join(' ');
+    const parsed = RawBriefSchema.safeParse(minimalRawBrief({
+      whatHappened: [{ text: 'x', quote: longQuote, unknown: false }],
+    }));
+    expect(parsed.success).toBe(false);
+  });
+
+  it('accepts a well-formed minimal brief', () => {
+    const parsed = RawBriefSchema.safeParse(minimalRawBrief());
+    expect(parsed.success).toBe(true);
+  });
+});

@@ -1,0 +1,16 @@
+{
+  "id": "wallet",
+  "label": "Wallet",
+  "description": "A wallet application or custodial service that holds or transacts Lumens/Stellar assets on behalf of end users.",
+  "typicalInfrastructure": [
+    "A Horizon or RPC endpoint (self-hosted or via a third-party provider)",
+    "A signing service or embedded key management",
+    "A transaction-submission pipeline"
+  ],
+  "questionsToAsk": [
+    "Do we run our own stellar-core/Horizon/RPC node, or rely on a provider?",
+    "If we rely on a provider, have they confirmed they've applied this update?",
+    "Does this change affect transaction fees, signing, or submission behavior our users would notice?"
+  ],
+  "whoToNotify": ["Engineering lead", "Customer support (if user-visible impact)"]
+}
