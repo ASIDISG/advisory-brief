@@ -36,6 +36,9 @@ real network access.
 
 ## Adding your source to the UI
 
-Once implemented, add it to the source list wherever the UI/CLI enumerates available sources
-(currently just `manual-paste` is wired into `app/page.tsx`; a source picker for multiple
-sources is itself a good "Medium" issue — see `ISSUES_BACKLOG.md`).
+A source is only useful once something calls it. The `stellar/stellar-core` releases source is
+wired in through `app/api/sources/stellar-core/route.ts` (a thin GET route that returns
+`fetchLatest()` as JSON, with a mocked-fetch test beside it) and the "Load latest stellar-core
+release" button in `app/page.tsx`. Follow that pattern for a new source. The UI currently has
+one hardcoded button per source; a proper source picker is a reasonable follow-up — see
+`ISSUES_BACKLOG.md`.

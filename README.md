@@ -42,7 +42,16 @@ npm run dev
 
 No Anthropic access? Get a free `GEMINI_API_KEY` at [aistudio.google.com](https://aistudio.google.com) — no card required — and put it in `.env` instead. `app/api/brief/route.ts` uses whichever one is set.
 
-Open `http://localhost:3000`, click "Load a real example," and click "Generate brief."
+Open `http://localhost:3000`, click "Load latest stellar-core release" (it fetches the newest
+stable release notes from GitHub), and click "Generate brief." You can also paste any advisory
+text instead.
+
+## Deployment note
+
+`/api/brief` has no authentication and no rate limiting, and every request spends the model API
+key set in `.env`. This project is meant to run locally or on a private network. Do not expose
+an instance publicly with a real key until rate limiting is added; it is tracked as an issue
+in [`ISSUES_BACKLOG.md`](ISSUES_BACKLOG.md).
 
 ## How it works
 

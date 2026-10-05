@@ -1,15 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { AUDIENCES } from '@/src/audiences/index';
+import { AUDIENCES, getAudience } from '@/src/audiences/index';
 import { toMarkdown, toSlackMessage } from '@/src/brief/format';
 import type { VerifiedBrief } from '@/src/brief/schema';
+import type { Advisory } from '@/src/sources/types';
 
-const FIXTURE_1 = {
-  sourceUrl: 'https://discord.com/channels/897514728459468821/900374272751591424/1554246285765382295',
-  sourceLabel: 'Stellar Discord announcement, Sept 24, 2026',
-  text: "A new security-focused Protocol 29 release is out, with the Testnet vote scheduled for September 29th 1700 UTC and Mainnet on October 1st 1700 UTC. Stellar-core 29.0.0-3589.4eb833373 fixes recently identified vulnerabilities, which to the best of our knowledge have not been exploited. It's available from the apt stable repo or Docker Hub (https://hub.docker.com/r/stellar/stellar-core/tags). Horizon and RPC operators should pull stellar-horizon:29.0.0 (https://hub.docker.com/r/stellar/stellar-horizon/tags) or stellar-rpc:29.0.0 (https://hub.docker.com/r/stellar/stellar-rpc/tags), which bundle the new core binary with no other relevant changes.",
-};
+// Matches the request-size limit in app/api/brief/route.ts.
+const MAX_SOURCE_CHARS = 20000;
 
 const URGENCY_COLORS: Record<string, string> = {
   ACT_NOW: 'bg-red-100 text-red-800 border-red-300',
@@ -18,22 +16,75 @@ const URGENCY_COLORS: Record<string, string> = {
   NO_ACTION: 'bg-green-100 text-green-800 border-green-300',
 };
 
+/** Hand-written profile data from src/audiences, not model output and not derived from the
+ * advisory, so it is labelled as general guidance rather than presented as a finding. */
+function AudienceGuidance({ audienceId }: { audienceId: string }) {
+  const audience = getAudience(audienceId);
+  if (!audience) return null;
+  return (
+    <div className="mt-4 rounded bg-gray-50 p-3 text-sm">
+      <p className="text-xs text-gray-500">
+        General guidance for a {audience.label.toLowerCase()} — not taken from this advisory.
+      </p>
+      <p className="mt-2 font-medium">Questions to ask your team</p>
+      <ul className="mt-1 list-disc pl-5">
+        {audience.questionsToAsk.map((q) => (
+          <li key={q}>{q}</li>
+        ))}
+      </ul>
+      <p className="mt-2 font-medium">Who to notify</p>
+      <p className="mt-1">{audience.whoToNotify.join(', ')}</p>
+      <p className="mt-2 font-medium">Infrastructure this often touches</p>
+      <ul className="mt-1 list-disc pl-5">
+        {audience.typicalInfrastructure.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function Home() {
   const [sourceText, setSourceText] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
   const [sourceLabel, setSourceLabel] = useState('');
   const [brief, setBrief] = useState<VerifiedBrief | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingRelease, setLoadingRelease] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeAudience, setActiveAudience] = useState<string>('wallet');
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
 
-  function loadFixture() {
-    setSourceText(FIXTURE_1.text);
-    setSourceUrl(FIXTURE_1.sourceUrl);
-    setSourceLabel(FIXTURE_1.sourceLabel);
-    setBrief(null);
+  async function loadLatestRelease() {
+    setLoadingRelease(true);
     setError(null);
+    setBrief(null);
+    try {
+      const res = await fetch('/api/sources/stellar-core');
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? 'Could not load the latest stellar-core release.');
+        return;
+      }
+      const latest = (data.advisories as Advisory[])[0];
+      if (!latest) {
+        setError('No stable stellar-core release with release notes was found.');
+        return;
+      }
+      if (latest.text.length > MAX_SOURCE_CHARS) {
+        setError(
+          `The latest release notes are ${latest.text.length} characters, over the ${MAX_SOURCE_CHARS} limit. Paste the relevant part instead.`
+        );
+        return;
+      }
+      setSourceText(latest.text);
+      setSourceUrl(latest.sourceUrl ?? '');
+      setSourceLabel(latest.sourceLabel);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoadingRelease(false);
+    }
   }
 
   async function generate() {
@@ -74,8 +125,9 @@ export default function Home() {
       <h1 className="text-2xl font-bold">Advisory Brief</h1>
       <p className="mt-2 text-sm text-gray-600">
         Turn a Stellar security advisory or release announcement into a plain-language brief for
-        non-engineers. Every claim is checked against the source text in code, not just asked of
-        the model — an unverifiable claim is removed and counted, not hidden.
+        non-engineers. Each claim must carry a quote, and code checks that the quote appears in the
+        source text; a claim whose quote is not found is removed and counted, not hidden. The
+        quote check does not prove the wording next to it is accurate, so verify before acting.
       </p>
 
       <div className="mt-6 space-y-3">
@@ -111,10 +163,11 @@ export default function Home() {
           </button>
           <button
             type="button"
-            onClick={loadFixture}
-            className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700"
+            onClick={loadLatestRelease}
+            disabled={loadingRelease}
+            className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 disabled:opacity-40"
           >
-            Load a real example (Protocol 29)
+            {loadingRelease ? 'Loading…' : 'Load latest stellar-core release'}
           </button>
         </div>
       </div>
@@ -170,6 +223,7 @@ export default function Home() {
                   {a.explanation.unknown ? <em className="text-gray-500">Unclear from the source.</em> : a.explanation.text}
                 </div>
               ))}
+            <AudienceGuidance audienceId={activeAudience} />
           </section>
 
           <section>

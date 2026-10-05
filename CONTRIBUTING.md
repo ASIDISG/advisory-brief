@@ -4,9 +4,16 @@
 
 ```bash
 npm install
-cp .env.example .env   # add your own ANTHROPIC_API_KEY
+cp .env.example .env   # add your own ANTHROPIC_API_KEY (or GEMINI_API_KEY)
 npm run dev
 ```
+
+**Known quirk: don't mix operating systems on one `node_modules`.** Some dependencies ship
+platform-specific native binaries (Tailwind's `lightningcss`, Next's SWC compiler). If you ran
+`npm install` on Windows and then `npm run dev` from WSL (or the reverse), the page fails with
+`Cannot find module '../lightningcss.linux-x64-gnu.node'`. Install and run in the same
+environment. On WSL, clone into the Linux filesystem (for example `~/advisory-brief`) rather than
+`/mnt/c/...`, which is also much slower: a cold `next dev` took minutes there.
 
 ## Branch / PR flow
 
