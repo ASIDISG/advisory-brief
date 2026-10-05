@@ -35,7 +35,7 @@ export function toMarkdown(brief: VerifiedBrief): string {
   lines.push(
     '',
     `## Verification`,
-    `${brief.verification.verifiedClaims}/${brief.verification.totalClaims} claims verified against the source.` +
+    `${brief.verification.verifiedClaims}/${brief.verification.totalClaims} claims have a quote found in the source.` +
       (brief.verification.rejectedClaims > 0
         ? ` ${brief.verification.rejectedClaims} unverifiable claim(s) were removed.`
         : '')

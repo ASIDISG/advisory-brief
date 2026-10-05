@@ -32,7 +32,7 @@ describe('toMarkdown', () => {
     expect(md).toContain('## Are you affected?');
     expect(md).toContain('Wallet');
     expect(md).toContain('(unclear from the source)');
-    expect(md).toContain('4/5 claims verified');
+    expect(md).toContain('4/5 claims have a quote found in the source');
     expect(md).toContain('[Example advisory](https://example.com/advisory)');
   });
 });

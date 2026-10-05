@@ -4,22 +4,29 @@ Turn a Stellar security advisory or release announcement into a plain-language b
 **non-engineers** — business owners, compliance leads, and product managers at wallets,
 anchors, fintechs, and exchanges. Node operators already get advisories written for them;
 everyone downstream of a node operator gets protocol jargon and has to translate it under
-time pressure. This tool does that translation, with a hard constraint: it never states more
-than the source advisory actually says.
+time pressure. This tool does that translation, and makes every factual claim in the brief
+traceable to a quote in the source advisory.
 
-## Why this is grounded, not just summarized
+## What "grounded" means here (and what it doesn't)
 
 Most LLM summarizers will confidently restate, embellish, or hallucinate a plausible-sounding
-detail. This one is structurally prevented from doing that:
+detail. This tool adds a mechanical check against that, with deliberate limits:
 
 - The model returns structured JSON, and every factual claim carries either a verbatim
-  `quote` (≤25 words) or an explicit `unknown: true` — never a bare, unverifiable assertion.
+  `quote` (≤25 words) or an explicit `unknown: true`.
 - **Code, not the model, verifies every quote is a real substring of the source** (after
-  whitespace/case normalization). A claim that fails is stripped and counted in a
+  whitespace/case normalization). A claim whose quote fails is stripped and counted in a
   "verification" summary shown to the user, not hidden.
 - Any date must itself appear in the source text, or it's dropped from the brief.
-- `urgency` is a closed enum (`ACT_NOW` / `ACT_BEFORE_DEADLINE` / `MONITOR` / `NO_ACTION`),
-  validated with zod — the model can't invent a new severity label.
+- `urgency.level` is a closed enum (`ACT_NOW` / `ACT_BEFORE_DEADLINE` / `MONITOR` /
+  `NO_ACTION`), validated with zod, so the model can't invent a new severity label.
+
+**What this does not guarantee.** The check proves a quote exists in the source. It does not
+prove the plain-language `text` next to that quote is actually supported by it, so a claim can
+carry a real quote and still be a poor paraphrase. The `urgency.level` choice, the per-audience
+YES/NO/UNCLEAR "affected" flags, and the `whatWeDontKnow` list are model judgments that are not
+checked against the source at all. Treat a brief as a faster way to read the advisory, not a
+substitute for reading it, and use the quotes to check anything you act on.
 
 See [`src/brief/grounding.ts`](src/brief/grounding.ts) for the actual enforcement.
 
@@ -60,11 +67,9 @@ Open `http://localhost:3000`, click "Load a real example," and click "Generate b
 See [`ISSUES_BACKLOG.md`](ISSUES_BACKLOG.md) for ~20 scoped, ready-to-pick-up issues, and
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the fuller design writeup.
 
-## Contributing via Stellar Wave
+## Contributing
 
-This repo is applying to the [Stellar Wave Program](https://docs.drips.network/wave/), where
-maintainers list scoped issues and outside contributors solve them for points. See
-[`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the PR flow, and how issues are rated.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the PR flow, and how issues are rated.
 
 ## License
 

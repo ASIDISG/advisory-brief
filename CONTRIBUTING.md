@@ -30,8 +30,8 @@ test that would otherwise need the Anthropic API or GitHub's API mocks it (see
 
 ## How issues are rated
 
-Every issue in [`ISSUES_BACKLOG.md`](ISSUES_BACKLOG.md) (and future ones added via the Stellar
-Wave Program) is tagged **Trivial**, **Medium**, or **High**:
+Every issue in [`ISSUES_BACKLOG.md`](ISSUES_BACKLOG.md) is tagged **Trivial**, **Medium**, or
+**High**:
 
 - **Trivial** — typos, small bug fixes, minor copy changes, a new audience profile, a new
   fixture, clearer error messages.

@@ -191,7 +191,7 @@ export default function Home() {
           </section>
 
           <section className="border-t border-gray-200 pt-3 text-xs text-gray-500">
-            {brief.verification.verifiedClaims}/{brief.verification.totalClaims} claims verified against the source.
+            {brief.verification.verifiedClaims}/{brief.verification.totalClaims} claims have a quote found in the source.
             {brief.verification.rejectedClaims > 0 &&
               ` ${brief.verification.rejectedClaims} unverifiable claim(s) were removed.`}
             {brief.verification.rejectedDates.length > 0 &&
