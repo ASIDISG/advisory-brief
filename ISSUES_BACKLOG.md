@@ -4,6 +4,8 @@ Candidate issues, each written to be posted to GitHub as-is. Every entry states 
 state at a specific commit, what to build, how to verify it, and what is out of scope.
 Complexity (Trivial / Medium / High) follows the tiers in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 If you pick one up, comment on the issue first so two people don't build the same thing.
+Entries marked **Posted on GitHub** are open issues: comment there, not here. The rest are
+candidates that have not been posted yet.
 
 Audited commit: `6e63cb2`
 
@@ -55,6 +57,7 @@ Judging the prose quality of claim text. Running the eval in CI.
 
 ### 2. Rate-limit `/api/brief`
 **Complexity:** High
+**Posted on GitHub:** #8
 
 **Description**
 The route is unauthenticated and every request spends the configured model key. Anyone who
@@ -85,6 +88,7 @@ User accounts or API keys. Billing.
 
 ### 3. Reject claim text whose numbers, versions or dates are not in the source
 **Complexity:** Medium
+**Posted on GitHub:** #6
 
 **Description**
 The verifier proves each claim's `quote` is in the source, but not that the claim's own `text`
@@ -177,6 +181,7 @@ Scraping pages that are not a published feed. Discord or other chat sources.
 
 ### 6. Accessibility pass on the brief view
 **Complexity:** Medium
+**Posted on GitHub:** #7
 
 **Description**
 The page has not been checked for keyboard use, screen readers or color contrast.
