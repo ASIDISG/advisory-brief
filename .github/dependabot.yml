@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    groups:
+      # Next.js and eslint-config-next are pinned to the same version; update them together.
+      next:
+        patterns:
+          - next
+          - eslint-config-next
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

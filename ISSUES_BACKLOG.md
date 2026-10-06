@@ -30,6 +30,12 @@ hand-written expected urgency level and expected per-audience YES/NO/UNCLEAR cal
 `npm run eval` script runs the real generator against each and reports urgency accuracy, audience
 accuracy, and the share of claims whose quote was found.
 
+A concrete first case: for the `stellar/stellar-core` v29.0.0 release notes (a plain changelog),
+a real run produced "Security or stability improvements were made to the outbound queue load
+shedding and handshake authentication". Its quote was found in the source, but the source never
+says "security". The gold expectation for that case should flag a claim that characterizes the
+changes as security-related when the source does not.
+
 **Acceptance criteria**
 - [ ] At least five real source texts with hand-written expectations, sources cited.
 - [ ] `npm run eval` prints per-case and aggregate results.

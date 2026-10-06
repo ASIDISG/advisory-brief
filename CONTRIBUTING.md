@@ -56,3 +56,16 @@ early and ask questions — better than a large PR landing with no discussion al
 Both are designed to be additive, not core changes — see
 [`docs/ADDING_A_SOURCE.md`](docs/ADDING_A_SOURCE.md) and
 [`docs/ADDING_AN_AUDIENCE.md`](docs/ADDING_AN_AUDIENCE.md).
+
+## How maintainers work here
+
+- There is currently one maintainer. Response times are best effort; there is no guaranteed
+  turnaround.
+- A bug report is reproduced before a fix is accepted. A feature is discussed in its issue
+  before a PR is opened.
+- CI (lint, typecheck, tests, build) must pass before merge.
+- A change to the grounding verifier (`src/brief/grounding.ts`) needs tests, and the README's
+  "What grounded means here" section must stay accurate about what is and isn't checked.
+- A change that affects a documented claim updates the docs in the same PR.
+- This repository is an application, not a published package, so it has no release tags.
+- Security reports: see [`SECURITY.md`](SECURITY.md).
