@@ -20,7 +20,9 @@ detail. This tool adds a mechanical check against that, with deliberate limits:
   `quote` (≤25 words) or an explicit `unknown: true`.
 - **Code, not the model, verifies every quote is a real substring of the source** (after
   whitespace/case normalization). A claim whose quote fails is stripped and counted in a
-  "verification" summary shown to the user, not hidden.
+  "verification" summary shown to the user, not hidden. In its place the brief shows "Removed:
+  its quote could not be found in the source", which is deliberately different from "Unclear
+  from the source" (a claim the model itself marked unknown).
 - A claim the model marks `unknown` cites no quote, so there is nothing to check. These are
   counted separately from verified claims (the brief shows, for example, "7/11 claims have a
   quote found in the source. 4 marked unknown").

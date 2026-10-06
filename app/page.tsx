@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { AUDIENCES, getAudience } from '@/src/audiences/index';
 import { toMarkdown, toSlackMessage } from '@/src/brief/format';
-import type { VerifiedBrief } from '@/src/brief/schema';
+import { isRemovedClaim } from '@/src/brief/grounding';
+import type { Claim, VerifiedBrief } from '@/src/brief/schema';
 import type { Advisory } from '@/src/sources/types';
 
 // Matches the request-size limit in app/api/brief/route.ts.
@@ -15,6 +16,18 @@ const URGENCY_COLORS: Record<string, string> = {
   MONITOR: 'bg-blue-100 text-blue-800 border-blue-300',
   NO_ACTION: 'bg-green-100 text-green-800 border-green-300',
 };
+
+/** Shows a claim, telling apart the two reasons it can have no text: the model marked it unknown
+ * (nothing to check), or the verifier removed it because its quote was not in the source. */
+function ClaimText({ claim, unclear = 'Unclear from the source.' }: { claim: Claim; unclear?: string }) {
+  if (isRemovedClaim(claim)) {
+    return <em className="text-red-700">Removed: its quote could not be found in the source.</em>;
+  }
+  if (claim.unknown) {
+    return <em className="text-gray-500">{unclear}</em>;
+  }
+  return <>{claim.text}</>;
+}
 
 /** Hand-written profile data from src/audiences, not model output and not derived from the
  * advisory, so it is labelled as general guidance rather than presented as a finding. */
@@ -182,7 +195,7 @@ export default function Home() {
             <h2 className="font-semibold">What happened</h2>
             <ul className="mt-1 list-disc pl-5 text-sm">
               {brief.whatHappened.map((c, i) => (
-                <li key={i}>{c.unknown ? <em className="text-gray-500">Unclear from the source.</em> : c.text}</li>
+                <li key={i}><ClaimText claim={c} /></li>
               ))}
             </ul>
           </section>
@@ -193,7 +206,7 @@ export default function Home() {
             >
               {brief.urgency.level.replace(/_/g, ' ')}
             </span>
-            <p className="mt-2 text-sm">{brief.urgency.reason.unknown ? 'Reason unclear from the source.' : brief.urgency.reason.text}</p>
+            <p className="mt-2 text-sm"><ClaimText claim={brief.urgency.reason} unclear="Reason unclear from the source." /></p>
             {brief.urgency.deadlines.length > 0 && (
               <p className="mt-1 text-sm text-gray-600">Deadline(s): {brief.urgency.deadlines.join(', ')}</p>
             )}
@@ -220,7 +233,7 @@ export default function Home() {
               .map((a) => (
                 <div key={a.audienceId} className="mt-2 text-sm">
                   <span className="font-medium">{a.affected}</span> —{' '}
-                  {a.explanation.unknown ? <em className="text-gray-500">Unclear from the source.</em> : a.explanation.text}
+                  <ClaimText claim={a.explanation} />
                 </div>
               ))}
             <AudienceGuidance audienceId={activeAudience} />
@@ -230,7 +243,7 @@ export default function Home() {
             <h2 className="font-semibold">What to tell your team</h2>
             <ul className="mt-1 list-disc pl-5 text-sm">
               {brief.whatToTellYourTeam.map((c, i) => (
-                <li key={i}>{c.unknown ? <em className="text-gray-500">Unclear from the source.</em> : c.text}</li>
+                <li key={i}><ClaimText claim={c} /></li>
               ))}
             </ul>
           </section>

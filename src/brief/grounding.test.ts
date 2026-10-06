@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeForMatch, verifyBrief } from './grounding';
+import { isRemovedClaim, normalizeForMatch, REMOVED_CLAIM_TEXT, verifyBrief } from './grounding';
 import type { RawBrief } from './schema';
 import { RawBriefSchema, UrgencyLevel } from './schema';
 
@@ -79,6 +79,25 @@ describe('verifyBrief', () => {
     expect(result.verification.rejectedClaims).toBe(1);
     expect(result.verification.verifiedClaims).toBe(4);
     expect(result.verification.unknownClaims).toBe(4);
+  });
+
+  it('tells a removed claim apart from a claim the model itself marked unknown', () => {
+    const raw = minimalRawBrief({
+      whatHappened: [claim('The sky is falling.', 'this text does not appear anywhere in the source')],
+    });
+    const result = verifyBrief(raw, SOURCE, null, 'test');
+    // Both have no quote and unknown: true, but only the first was checked and failed.
+    expect(isRemovedClaim(result.whatHappened[0])).toBe(true);
+    expect(result.whatHappened[0].text).toBe(REMOVED_CLAIM_TEXT);
+    for (const a of result.affected) {
+      expect(a.explanation.unknown).toBe(true);
+      expect(isRemovedClaim(a.explanation)).toBe(false);
+    }
+  });
+
+  it('does not treat a verified claim as removed', () => {
+    const result = verifyBrief(minimalRawBrief(), SOURCE, null, 'test');
+    expect(isRemovedClaim(result.whatHappened[0])).toBe(false);
   });
 
   it('matches through whitespace and case normalization edge cases', () => {

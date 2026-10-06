@@ -1,6 +1,7 @@
 import { AUDIENCES } from '../audiences/index';
+import { isRemovedClaim } from './grounding';
 import { renderSourcesLine } from './sources-line';
-import type { VerifiedBrief } from './schema';
+import type { Claim, VerifiedBrief } from './schema';
 
 function audienceLabel(id: string): string {
   return AUDIENCES.find((a) => a.id === id)?.label ?? id;
@@ -49,7 +50,8 @@ export function toMarkdown(brief: VerifiedBrief): string {
   return lines.join('\n');
 }
 
-function claimLine(c: { text: string; unknown: boolean }): string {
+function claimLine(c: Claim): string {
+  if (isRemovedClaim(c)) return '*(removed: its quote could not be found in the source)*';
   return c.unknown ? `${c.text} *(unclear from the source)*` : c.text;
 }
 

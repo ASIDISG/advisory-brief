@@ -9,15 +9,26 @@ export function normalizeForMatch(s: string): string {
   return s.toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
+/** The text of the placeholder that replaces a claim whose quote was not found in the source. */
+export const REMOVED_CLAIM_TEXT = 'A claim here could not be verified against the source advisory and was removed.';
+
 /** A claim that failed verification is never silently dropped from the record -- it's
  * replaced with an explicit, visible "this was removed" marker so `whatHappened.length`
  * etc. don't just quietly shrink with no explanation in the rendered brief. */
 function rejectedClaimPlaceholder(): Claim {
   return {
-    text: 'A claim here could not be verified against the source advisory and was removed.',
+    text: REMOVED_CLAIM_TEXT,
     quote: null,
     unknown: true,
   };
+}
+
+/** True for the placeholder that replaced a removed claim. A removed claim is also marked
+ * `unknown` (it has no quote), but it is NOT the same as a claim the model itself marked unknown:
+ * one was checked and failed, the other had nothing to check. Anything that shows claims to a
+ * reader should tell them apart. */
+export function isRemovedClaim(claim: Claim): boolean {
+  return claim.unknown && claim.quote === null && claim.text === REMOVED_CLAIM_TEXT;
 }
 
 /** What happened to one claim:
