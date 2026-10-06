@@ -7,6 +7,10 @@ everyone downstream of a node operator gets protocol jargon and has to translate
 time pressure. This tool does that translation, and makes every factual claim in the brief
 traceable to a quote in the source advisory.
 
+**See a real run without an API key:** the
+[Advisory Brief playground](https://stellarbrief.github.io/playground/advisory/) shows one recorded brief,
+claim by claim, with each quote re-checked against the source.
+
 ## What "grounded" means here (and what it doesn't)
 
 Most LLM summarizers will confidently restate, embellish, or hallucinate a plausible-sounding
