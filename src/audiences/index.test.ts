@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AUDIENCES, getAudience } from './index';
+import { AUDIENCES, getAudience, withArticle } from './index';
 import { AudienceIdSchema } from '../brief/schema';
 
 describe('audience profiles', () => {
@@ -13,6 +13,17 @@ describe('audience profiles', () => {
       expect(a.questionsToAsk.length).toBeGreaterThan(0);
       expect(a.whoToNotify.length).toBeGreaterThan(0);
       expect(a.typicalInfrastructure.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('uses the right article for every audience label', () => {
+    expect(withArticle('wallet')).toBe('a wallet');
+    expect(withArticle('fintech')).toBe('a fintech');
+    expect(withArticle('anchor')).toBe('an anchor');
+    expect(withArticle('exchange')).toBe('an exchange');
+    // The labels actually shown in the UI, lowercased.
+    for (const a of AUDIENCES) {
+      expect(withArticle(a.label.toLowerCase())).toMatch(/^an? /);
     }
   });
 

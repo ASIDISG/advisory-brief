@@ -22,6 +22,11 @@ export interface AudienceProfile {
  * things without touching core" requirement. */
 export const AUDIENCES: AudienceProfile[] = [wallet, anchor, fintech, exchange] as AudienceProfile[];
 
+/** "a wallet", "an exchange": the indefinite article for a lowercase audience label. */
+export function withArticle(label: string): string {
+  return /^[aeiou]/i.test(label) ? `an ${label}` : `a ${label}`;
+}
+
 export function getAudience(id: string): AudienceProfile | undefined {
   return AUDIENCES.find((a) => a.id === id);
 }

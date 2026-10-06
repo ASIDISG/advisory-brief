@@ -33,8 +33,11 @@ accuracy, and the share of claims whose quote was found.
 A concrete first case: for the `stellar/stellar-core` v29.0.0 release notes (a plain changelog),
 a real run produced "Security or stability improvements were made to the outbound queue load
 shedding and handshake authentication". Its quote was found in the source, but the source never
-says "security". The gold expectation for that case should flag a claim that characterizes the
-changes as security-related when the source does not.
+says "security". A later run on the same text produced "security-related adjustments such as
+stopping message reading during the auth handshake", where the source says only "Don't read
+messages during auth handshake". The gold expectation for that case should flag a claim that
+characterizes the changes as security-related when the source does not. Two runs, same text, same
+embellishment, different wording: a good sign this needs measuring, not guessing.
 
 **Acceptance criteria**
 - [ ] At least five real source texts with hand-written expectations, sources cited.

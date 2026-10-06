@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AUDIENCES, getAudience } from '@/src/audiences/index';
+import { AUDIENCES, getAudience, withArticle } from '@/src/audiences/index';
 import { toMarkdown, toSlackMessage } from '@/src/brief/format';
 import { isRemovedClaim } from '@/src/brief/grounding';
 import type { Claim, VerifiedBrief } from '@/src/brief/schema';
@@ -37,7 +37,7 @@ function AudienceGuidance({ audienceId }: { audienceId: string }) {
   return (
     <div className="mt-4 rounded bg-gray-50 p-3 text-sm">
       <p className="text-xs text-gray-500">
-        General guidance for a {audience.label.toLowerCase()} — not taken from this advisory.
+        General guidance for {withArticle(audience.label.toLowerCase())} — not taken from this advisory.
       </p>
       <p className="mt-2 font-medium">Questions to ask your team</p>
       <ul className="mt-1 list-disc pl-5">
