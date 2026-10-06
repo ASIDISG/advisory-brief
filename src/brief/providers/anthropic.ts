@@ -17,10 +17,13 @@ export interface AnthropicMessagesClient {
  * https://platform.claude.com/docs/en/build-with-claude/structured-outputs.
  */
 export function createAnthropicGenerator(client: AnthropicMessagesClient, model?: string): RawJsonGenerator {
+  const resolveModel = () => model || process.env.ANTHROPIC_MODEL || 'claude-sonnet-5';
+
   return {
+    describe: () => ({ provider: 'anthropic', model: resolveModel() }),
     async generate(prompt: string, jsonSchema: Record<string, unknown>): Promise<string> {
       const message = await client.messages.create({
-        model: model || process.env.ANTHROPIC_MODEL || 'claude-sonnet-5',
+        model: resolveModel(),
         max_tokens: 4096,
         output_config: {
           format: { type: 'json_schema', schema: jsonSchema },

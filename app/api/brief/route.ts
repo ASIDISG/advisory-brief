@@ -1,32 +1,13 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { generateBrief } from '@/src/brief/generate';
-import { createAnthropicGenerator } from '@/src/brief/providers/anthropic';
-import { createGeminiGenerator } from '@/src/brief/providers/gemini';
-import type { RawJsonGenerator } from '@/src/brief/providers/types';
+import { resolveGenerator } from '@/src/brief/providers/resolve';
 
 const RequestSchema = z.object({
   sourceText: z.string().min(1).max(20000),
   sourceUrl: z.string().url().nullable(),
   sourceLabel: z.string().min(1),
 });
-
-/** Picks whichever provider has a configured key -- Anthropic first if both are set, since
- * it's this project's primary target; Gemini as the free-tier fallback for contributors
- * without Anthropic access (see PLAN.md's "Gemini support" note). Neither SDK client is
- * constructed unless its own key is present, so a contributor who only has one key never
- * pays the (tiny) cost of instantiating the other. */
-function resolveGenerator(): RawJsonGenerator | null {
-  if (process.env.ANTHROPIC_API_KEY) {
-    return createAnthropicGenerator(new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }));
-  }
-  if (process.env.GEMINI_API_KEY) {
-    return createGeminiGenerator(new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }));
-  }
-  return null;
-}
 
 // Not cached and not statically prerenderable -- a real, per-request model call, matching
 // Next.js 16's Route Handler behavior for a POST (POST responses are never cached, unlike

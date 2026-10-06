@@ -24,7 +24,17 @@ export interface GeminiContentClient {
  * documented in the SDK's own type definitions, not assumed.
  */
 export function createGeminiGenerator(client: GeminiContentClient, model?: string): RawJsonGenerator {
+  // Default confirmed live, not guessed: `gemini-flash-latest` (Google's own
+  // stay-current alias, the more "correct" choice in principle) reliably returned a real
+  // 503 "high demand" for `responseMimeType: application/json` requests specifically
+  // (plain text generation on the same model succeeded every time) when this was tested.
+  // `gemini-3.1-flash-lite` was tried next and handled a real structured-output call
+  // (this project's actual schema) correctly on the first attempt. Revisit this default
+  // if `gemini-flash-latest`'s JSON-mode capacity issue turns out to have been temporary.
+  const resolveModel = () => model || process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
+
   return {
+    describe: () => ({ provider: 'gemini', model: resolveModel() }),
     async generate(prompt: string, jsonSchema: Record<string, unknown>): Promise<string> {
       // Gemini's `responseJsonSchema` supports a documented subset of JSON Schema keywords
       // that does not include the top-level `$schema` meta field zod's `toJSONSchema()`
@@ -33,15 +43,8 @@ export function createGeminiGenerator(client: GeminiContentClient, model?: strin
       const schemaForGemini = { ...jsonSchema };
       delete schemaForGemini.$schema;
 
-      // Default confirmed live, not guessed: `gemini-flash-latest` (Google's own
-      // stay-current alias, the more "correct" choice in principle) reliably returned a real
-      // 503 "high demand" for `responseMimeType: application/json` requests specifically
-      // (plain text generation on the same model succeeded every time) when this was tested.
-      // `gemini-3.1-flash-lite` was tried next and handled a real structured-output call
-      // (this project's actual schema) correctly on the first attempt. Revisit this default
-      // if `gemini-flash-latest`'s JSON-mode capacity issue turns out to have been temporary.
       const response = await client.models.generateContent({
-        model: model || process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+        model: resolveModel(),
         contents: prompt,
         config: {
           responseMimeType: 'application/json',

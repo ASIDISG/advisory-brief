@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { verifyBrief } from './grounding';
 import type { RawJsonGenerator } from './providers/types';
-import { RawBriefSchema, type VerifiedBrief } from './schema';
+import { RawBriefSchema, type RawBrief, type VerifiedBrief } from './schema';
 
 /** Generated once from `RawBriefSchema` itself (zod v4's native `z.toJSONSchema`), not
  * hand-duplicated -- the model's output contract and the schema this file validates it
@@ -24,11 +24,26 @@ export interface GenerateBriefInput {
  * `verifyBrief` is what actually checks.
  */
 export async function generateBrief(generator: RawJsonGenerator, input: GenerateBriefInput): Promise<VerifiedBrief> {
+  return (await generateBriefDetailed(generator, input)).verified;
+}
+
+export interface GenerateBriefResult {
+  /** What the model returned, schema-valid but not yet checked against the source. */
+  raw: RawBrief;
+  verified: VerifiedBrief;
+}
+
+/** Same as `generateBrief`, but also returns the raw model output, so a recording can show
+ * what the verifier was given and what it removed. */
+export async function generateBriefDetailed(
+  generator: RawJsonGenerator,
+  input: GenerateBriefInput
+): Promise<GenerateBriefResult> {
   const rawText = await generator.generate(buildPrompt(input.sourceText), RAW_BRIEF_JSON_SCHEMA);
   const parsedJson = JSON.parse(rawText);
   const raw = RawBriefSchema.parse(parsedJson);
 
-  return verifyBrief(raw, input.sourceText, input.sourceUrl, input.sourceLabel);
+  return { raw, verified: verifyBrief(raw, input.sourceText, input.sourceUrl, input.sourceLabel) };
 }
 
 function buildPrompt(sourceText: string): string {

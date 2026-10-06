@@ -6,4 +6,6 @@
  */
 export interface RawJsonGenerator {
   generate(prompt: string, jsonSchema: Record<string, unknown>): Promise<string>;
+  /** Which provider and model a call would use, so a recording can say what produced it. */
+  describe?(): { provider: string; model: string };
 }
