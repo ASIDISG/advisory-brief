@@ -21,10 +21,13 @@
 
 A sufficiently well-crafted prompt can reduce hallucination, but it cannot eliminate it, and it
 cannot prove after the fact that a given claim was real. Asking the model to also return the
-literal source substring behind every claim turns "trust the model" into "verify a substring
-match" — a cheap, deterministic, testable check that doesn't depend on the model's honesty on
-any given call. See `src/brief/grounding.test.ts` for the tests exercising this directly with a
-fabricated quote.
+literal source substring behind every claim makes the quote checkable with a cheap,
+deterministic, testable substring match that doesn't depend on the model's honesty on any given
+call. That covers the quote only. The plain-language `text` written next to it is still the
+model's wording, and a real run has produced a claim ("security … improvements") that its quote
+did not support. See `src/brief/grounding.test.ts` for the tests exercising the quote check with
+a fabricated quote, and the evaluation-harness issue in `ISSUES_BACKLOG.md` for measuring the
+rest.
 
 ## Why native structured outputs, not tool-use
 
