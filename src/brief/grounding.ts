@@ -20,30 +20,46 @@ function rejectedClaimPlaceholder(): Claim {
   };
 }
 
+/** What happened to one claim:
+ *  - `verified`: it cites a quote, and that quote was found in the source.
+ *  - `unknown`: the model marked it unknown and cites no quote, so there is nothing to check.
+ *  - `rejected`: it cites a quote that was NOT found in the source, so it was removed.
+ * `unknown` is counted separately and never as `verified`: a claim with no quote has not been
+ * checked against anything. */
+type ClaimStatus = 'verified' | 'unknown' | 'rejected';
+
 interface CheckResult {
   claim: Claim;
-  wasRejected: boolean;
+  status: ClaimStatus;
+}
+
+interface Tally {
+  total: number;
+  verified: number;
+  unknown: number;
+  rejected: number;
 }
 
 function checkClaim(claim: Claim, normalizedSource: string): CheckResult {
   if (claim.unknown) {
-    return { claim, wasRejected: false };
+    return { claim, status: 'unknown' };
   }
   const normalizedQuote = normalizeForMatch(claim.quote!);
   if (normalizedQuote.length > 0 && normalizedSource.includes(normalizedQuote)) {
-    return { claim, wasRejected: false };
+    return { claim, status: 'verified' };
   }
-  return { claim: rejectedClaimPlaceholder(), wasRejected: true };
+  return { claim: rejectedClaimPlaceholder(), status: 'rejected' };
 }
 
-function checkClaims(claims: Claim[], normalizedSource: string, tally: { total: number; verified: number; rejected: number }): Claim[] {
-  return claims.map((c) => {
-    tally.total++;
-    const { claim, wasRejected } = checkClaim(c, normalizedSource);
-    if (wasRejected) tally.rejected++;
-    else tally.verified++;
-    return claim;
-  });
+function checkAndCount(claim: Claim, normalizedSource: string, tally: Tally): Claim {
+  const result = checkClaim(claim, normalizedSource);
+  tally.total++;
+  tally[result.status]++;
+  return result.claim;
+}
+
+function checkClaims(claims: Claim[], normalizedSource: string, tally: Tally): Claim[] {
+  return claims.map((c) => checkAndCount(c, normalizedSource, tally));
 }
 
 /**
@@ -53,25 +69,23 @@ function checkClaims(claims: Claim[], normalizedSource: string, tally: { total: 
  * a visible rejection placeholder. Every `urgency.deadlines` entry must likewise appear in the
  * source, or it's dropped from the list entirely (dates don't need a placeholder the way
  * claims do -- a missing date is just absent, not a broken sentence).
+ *
+ * This checks that quotes exist in the source. It does not check that a claim's wording is
+ * supported by its quote, and claims marked unknown are counted separately because they carry
+ * nothing to check.
  */
 export function verifyBrief(raw: RawBrief, sourceText: string, sourceUrl: string | null, sourceLabel: string): VerifiedBrief {
   const normalizedSource = normalizeForMatch(sourceText);
-  const tally = { total: 0, verified: 0, rejected: 0 };
+  const tally: Tally = { total: 0, verified: 0, unknown: 0, rejected: 0 };
 
   const whatHappened = checkClaims(raw.whatHappened, normalizedSource, tally);
 
-  tally.total++;
-  const urgencyReasonResult = checkClaim(raw.urgency.reason, normalizedSource);
-  if (urgencyReasonResult.wasRejected) tally.rejected++;
-  else tally.verified++;
+  const urgencyReason = checkAndCount(raw.urgency.reason, normalizedSource, tally);
 
-  const affected: AudienceImpact[] = raw.affected.map((a) => {
-    tally.total++;
-    const result = checkClaim(a.explanation, normalizedSource);
-    if (result.wasRejected) tally.rejected++;
-    else tally.verified++;
-    return { ...a, explanation: result.claim };
-  });
+  const affected: AudienceImpact[] = raw.affected.map((a) => ({
+    ...a,
+    explanation: checkAndCount(a.explanation, normalizedSource, tally),
+  }));
 
   const whatToTellYourTeam = checkClaims(raw.whatToTellYourTeam, normalizedSource, tally);
 
@@ -88,7 +102,7 @@ export function verifyBrief(raw: RawBrief, sourceText: string, sourceUrl: string
     whatHappened,
     urgency: {
       level: raw.urgency.level,
-      reason: urgencyReasonResult.claim,
+      reason: urgencyReason,
       deadlines,
     },
     affected,
@@ -97,6 +111,7 @@ export function verifyBrief(raw: RawBrief, sourceText: string, sourceUrl: string
     verification: {
       totalClaims: tally.total,
       verifiedClaims: tally.verified,
+      unknownClaims: tally.unknown,
       rejectedClaims: tally.rejected,
       rejectedDates,
     },

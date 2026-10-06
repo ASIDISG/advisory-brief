@@ -90,6 +90,7 @@ async function main(): Promise<void> {
   const v = verified.verification;
   console.log(`Wrote ${out}`);
   console.log(`Claims with a quote found in the source: ${v.verifiedClaims}/${v.totalClaims}`);
+  console.log(`Marked unknown by the model (nothing to check): ${v.unknownClaims}`);
   console.log(`Removed: ${v.rejectedClaims} claim(s), ${v.rejectedDates.length} date(s)`);
   console.log(`Generator: ${JSON.stringify(recording.provenance.generator)}; working tree dirty: ${dirty}`);
 }

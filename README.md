@@ -17,6 +17,9 @@ detail. This tool adds a mechanical check against that, with deliberate limits:
 - **Code, not the model, verifies every quote is a real substring of the source** (after
   whitespace/case normalization). A claim whose quote fails is stripped and counted in a
   "verification" summary shown to the user, not hidden.
+- A claim the model marks `unknown` cites no quote, so there is nothing to check. These are
+  counted separately from verified claims (the brief shows, for example, "7/11 claims have a
+  quote found in the source. 4 marked unknown").
 - Any date must itself appear in the source text, or it's dropped from the brief.
 - `urgency.level` is a closed enum (`ACT_NOW` / `ACT_BEFORE_DEADLINE` / `MONITOR` /
   `NO_ACTION`), validated with zod, so the model can't invent a new severity label.

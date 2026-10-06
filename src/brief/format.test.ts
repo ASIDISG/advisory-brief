@@ -18,7 +18,7 @@ function sampleBrief(): VerifiedBrief {
     ],
     whatToTellYourTeam: [{ text: 'Upgrade before Oct 1.', quote: 'x', unknown: false }],
     whatWeDontKnow: ['The exact vulnerability is not described.'],
-    verification: { totalClaims: 5, verifiedClaims: 4, rejectedClaims: 1, rejectedDates: [] },
+    verification: { totalClaims: 6, verifiedClaims: 4, unknownClaims: 1, rejectedClaims: 1, rejectedDates: [] },
     sourceUrl: 'https://example.com/advisory',
     sourceLabel: 'Example advisory',
   };
@@ -32,7 +32,8 @@ describe('toMarkdown', () => {
     expect(md).toContain('## Are you affected?');
     expect(md).toContain('Wallet');
     expect(md).toContain('(unclear from the source)');
-    expect(md).toContain('4/5 claims have a quote found in the source');
+    expect(md).toContain('4/6 claims have a quote found in the source');
+    expect(md).toContain('1 marked unknown (no quote to check)');
     expect(md).toContain('[Example advisory](https://example.com/advisory)');
   });
 });

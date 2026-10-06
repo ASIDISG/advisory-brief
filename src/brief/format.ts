@@ -36,6 +36,9 @@ export function toMarkdown(brief: VerifiedBrief): string {
     '',
     `## Verification`,
     `${brief.verification.verifiedClaims}/${brief.verification.totalClaims} claims have a quote found in the source.` +
+      (brief.verification.unknownClaims > 0
+        ? ` ${brief.verification.unknownClaims} marked unknown (no quote to check).`
+        : '') +
       (brief.verification.rejectedClaims > 0
         ? ` ${brief.verification.rejectedClaims} unverifiable claim(s) were removed.`
         : '')

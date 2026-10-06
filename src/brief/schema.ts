@@ -81,7 +81,11 @@ export type RawBrief = z.infer<typeof RawBriefSchema>;
  * fabricated a claim, the brief says so instead of silently presenting a shorter list. */
 export const VerificationSummarySchema = z.object({
   totalClaims: z.number().int().nonnegative(),
+  /** Claims that cite a quote, where the quote was found in the source. */
   verifiedClaims: z.number().int().nonnegative(),
+  /** Claims the model marked unknown. They cite no quote, so nothing was checked. */
+  unknownClaims: z.number().int().nonnegative(),
+  /** Claims that cited a quote not found in the source, and were removed. */
   rejectedClaims: z.number().int().nonnegative(),
   rejectedDates: z.array(z.string()),
 });

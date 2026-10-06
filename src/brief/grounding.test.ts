@@ -41,7 +41,32 @@ describe('verifyBrief', () => {
     const result = verifyBrief(minimalRawBrief(), SOURCE, null, 'test');
     expect(result.whatHappened[0].unknown).toBe(false);
     expect(result.verification.rejectedClaims).toBe(0);
-    expect(result.verification.verifiedClaims).toBe(result.verification.totalClaims);
+  });
+
+  it('counts found-quote, unknown and rejected claims separately, and they add up to the total', () => {
+    // The fixture has 5 claims that cite a quote (whatHappened, the urgency reason and three
+    // team items) and 4 audience claims marked unknown.
+    const v = verifyBrief(minimalRawBrief(), SOURCE, null, 'test').verification;
+    expect(v.totalClaims).toBe(9);
+    expect(v.verifiedClaims).toBe(5);
+    expect(v.unknownClaims).toBe(4);
+    expect(v.rejectedClaims).toBe(0);
+    expect(v.verifiedClaims + v.unknownClaims + v.rejectedClaims).toBe(v.totalClaims);
+  });
+
+  it('never counts a claim that cites no quote as verified', () => {
+    const allUnknown = minimalRawBrief({
+      whatHappened: [claim('Nothing stated.', null, true)],
+      urgency: { level: 'MONITOR', reason: claim('Unclear.', null, true), deadlines: [] },
+      whatToTellYourTeam: [
+        claim('Unclear.', null, true),
+        claim('Unclear.', null, true),
+        claim('Unclear.', null, true),
+      ],
+    });
+    const v = verifyBrief(allUnknown, SOURCE, null, 'test').verification;
+    expect(v.verifiedClaims).toBe(0);
+    expect(v.unknownClaims).toBe(v.totalClaims);
   });
 
   it('rejects a fabricated quote that never appears in the source', () => {
@@ -52,6 +77,8 @@ describe('verifyBrief', () => {
     expect(result.whatHappened[0].unknown).toBe(true);
     expect(result.whatHappened[0].text).toMatch(/could not be verified/);
     expect(result.verification.rejectedClaims).toBe(1);
+    expect(result.verification.verifiedClaims).toBe(4);
+    expect(result.verification.unknownClaims).toBe(4);
   });
 
   it('matches through whitespace and case normalization edge cases', () => {
