@@ -1,0 +1,208 @@
+{
+  "provenance": {
+    "kind": "Recorded",
+    "description": "A real run of the real generator and verifier against a real release. Recorded once; not live.",
+    "recordedAt": "2026-10-06T09:25:55.585Z",
+    "tool": {
+      "repo": "stellarbrief/advisory-brief",
+      "commit": "4271452cade2ede2d1724b59edcf6980efa152e8",
+      "workingTreeDirty": false
+    },
+    "generator": {
+      "provider": "gemini",
+      "model": "gemini-3.1-flash-lite"
+    },
+    "command": "npx tsx scripts/record-brief.ts --tag v29.0.0",
+    "sourceFetchedFrom": "GitHub Releases API (stellar/stellar-core)"
+  },
+  "source": {
+    "url": "https://github.com/stellar/stellar-core/releases/tag/v29.0.0",
+    "label": "stellar/stellar-core release v29.0.0",
+    "publishedAt": "2026-10-05T19:19:08Z",
+    "text": "## What's Changed\r\n* Improve DEX offer crossing accuracy. by @dmkozh\r\n* P29 bump by @sisuresh\r\n* Don't count pool hops against limit by @sisuresh\r\n* Bump env to internal v29 by @sisuresh\r\n* Remove hash-of-hash optimization. by @dmkozh\r\n* Drop over-limit messages early by @bboston7\r\n* Outbound queue load shed fix by @marta-lokhova\r\n* Don't read messages during auth handshake by @SirTyson\r\n* Lower max message size in protocol 29 by @bboston7\r\n* Point release/v29.0.0-internal to public rs-soroban-env by @anupsdf \r\n\r\n**Full Changelog**: https://github.com/stellar/stellar-core/compare/v28.0.1...v29.0.0"
+  },
+  "raw": {
+    "whatHappened": [
+      {
+        "text": "The release notes document updates for Stellar-core version 29.0.0, including protocol-level changes.",
+        "quote": "v29.0.0-internal",
+        "unknown": false
+      },
+      {
+        "text": "Several technical improvements were made, such as optimizing DEX offer crossing and adjusting message size limits.",
+        "quote": "Improve DEX offer crossing accuracy.",
+        "unknown": false
+      },
+      {
+        "text": "Specific fixes related to network capacity and message handling were implemented, including outbound queue load shedding.",
+        "quote": "Outbound queue load shed fix",
+        "unknown": false
+      }
+    ],
+    "urgency": {
+      "level": "MONITOR",
+      "reason": {
+        "text": "The release notes provide a list of technical changes without indicating a mandatory security patch or immediate deadline.",
+        "quote": null,
+        "unknown": true
+      },
+      "deadlines": []
+    },
+    "affected": [
+      {
+        "audienceId": "wallet",
+        "affected": "UNCLEAR",
+        "explanation": {
+          "text": "The release notes do not explicitly state the impact on wallet services.",
+          "quote": null,
+          "unknown": true
+        }
+      },
+      {
+        "audienceId": "anchor",
+        "affected": "UNCLEAR",
+        "explanation": {
+          "text": "The release notes do not explicitly state the impact on anchor services.",
+          "quote": null,
+          "unknown": true
+        }
+      },
+      {
+        "audienceId": "fintech",
+        "affected": "UNCLEAR",
+        "explanation": {
+          "text": "The release notes do not explicitly state the impact on fintech applications.",
+          "quote": null,
+          "unknown": true
+        }
+      },
+      {
+        "audienceId": "exchange",
+        "affected": "UNCLEAR",
+        "explanation": {
+          "text": "While DEX offer crossing accuracy is mentioned, it is unclear if this mandates action for exchanges.",
+          "quote": "Improve DEX offer crossing accuracy.",
+          "unknown": false
+        }
+      }
+    ],
+    "whatToTellYourTeam": [
+      {
+        "text": "A new version of stellar-core (v29.0.0) has been released with various internal technical updates.",
+        "quote": "v29.0.0-internal",
+        "unknown": false
+      },
+      {
+        "text": "Engineering should review the changelog to understand the specific impacts of protocol 29 changes.",
+        "quote": "Lower max message size in protocol 29",
+        "unknown": false
+      },
+      {
+        "text": "Evaluate the need for an infrastructure upgrade by comparing the new version against current deployment versions.",
+        "quote": "https://github.com/stellar/stellar-core/compare/v28.0.1...v29.0.0",
+        "unknown": false
+      }
+    ],
+    "whatWeDontKnow": [
+      "Whether this release contains mandatory security fixes.",
+      "If this release introduces breaking changes for existing API integrations.",
+      "The official timeline for network-wide adoption of version 29.0.0."
+    ]
+  },
+  "verified": {
+    "whatHappened": [
+      {
+        "text": "The release notes document updates for Stellar-core version 29.0.0, including protocol-level changes.",
+        "quote": "v29.0.0-internal",
+        "unknown": false
+      },
+      {
+        "text": "Several technical improvements were made, such as optimizing DEX offer crossing and adjusting message size limits.",
+        "quote": "Improve DEX offer crossing accuracy.",
+        "unknown": false
+      },
+      {
+        "text": "Specific fixes related to network capacity and message handling were implemented, including outbound queue load shedding.",
+        "quote": "Outbound queue load shed fix",
+        "unknown": false
+      }
+    ],
+    "urgency": {
+      "level": "MONITOR",
+      "reason": {
+        "text": "The release notes provide a list of technical changes without indicating a mandatory security patch or immediate deadline.",
+        "quote": null,
+        "unknown": true
+      },
+      "deadlines": []
+    },
+    "affected": [
+      {
+        "audienceId": "wallet",
+        "affected": "UNCLEAR",
+        "explanation": {
+          "text": "The release notes do not explicitly state the impact on wallet services.",
+          "quote": null,
+          "unknown": true
+        }
+      },
+      {
+        "audienceId": "anchor",
+        "affected": "UNCLEAR",
+        "explanation": {
+          "text": "The release notes do not explicitly state the impact on anchor services.",
+          "quote": null,
+          "unknown": true
+        }
+      },
+      {
+        "audienceId": "fintech",
+        "affected": "UNCLEAR",
+        "explanation": {
+          "text": "The release notes do not explicitly state the impact on fintech applications.",
+          "quote": null,
+          "unknown": true
+        }
+      },
+      {
+        "audienceId": "exchange",
+        "affected": "UNCLEAR",
+        "explanation": {
+          "text": "While DEX offer crossing accuracy is mentioned, it is unclear if this mandates action for exchanges.",
+          "quote": "Improve DEX offer crossing accuracy.",
+          "unknown": false
+        }
+      }
+    ],
+    "whatToTellYourTeam": [
+      {
+        "text": "A new version of stellar-core (v29.0.0) has been released with various internal technical updates.",
+        "quote": "v29.0.0-internal",
+        "unknown": false
+      },
+      {
+        "text": "Engineering should review the changelog to understand the specific impacts of protocol 29 changes.",
+        "quote": "Lower max message size in protocol 29",
+        "unknown": false
+      },
+      {
+        "text": "Evaluate the need for an infrastructure upgrade by comparing the new version against current deployment versions.",
+        "quote": "https://github.com/stellar/stellar-core/compare/v28.0.1...v29.0.0",
+        "unknown": false
+      }
+    ],
+    "whatWeDontKnow": [
+      "Whether this release contains mandatory security fixes.",
+      "If this release introduces breaking changes for existing API integrations.",
+      "The official timeline for network-wide adoption of version 29.0.0."
+    ],
+    "verification": {
+      "totalClaims": 11,
+      "verifiedClaims": 11,
+      "rejectedClaims": 0,
+      "rejectedDates": []
+    },
+    "sourceUrl": "https://github.com/stellar/stellar-core/releases/tag/v29.0.0",
+    "sourceLabel": "stellar/stellar-core release v29.0.0"
+  }
+}
