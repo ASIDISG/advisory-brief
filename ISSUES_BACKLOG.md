@@ -197,3 +197,42 @@ A redesign. Internationalization.
 
 **Verification**
 Run the automated check, then complete the flow without a mouse.
+
+---
+
+### 7. Let quote matching ignore Markdown formatting characters
+**Complexity:** Medium
+
+_Written against commit `3536451`; later commits may have moved things, so check the code first._
+
+**Description**
+GitHub release notes are Markdown, and a model tends to quote the rendered text. A quote that is
+correct except for formatting characters is rejected, and a legitimate claim is removed from the
+brief.
+
+**Current state**
+`normalizeForMatch` in `src/brief/grounding.ts` lowercases and collapses whitespace, and nothing
+else. In a real run on the stellar-core v29.0.0 release notes, 2 of 11 claims were removed because
+they cited `Full Changelog: https://github.com/stellar/stellar-core/compare/v28.0.1...v29.0.0`,
+while the source reads `**Full Changelog**: https://github.com/stellar/stellar-core/compare/v28.0.1...v29.0.0`.
+Both claims were reasonable ("review the full changelog"); only the `**` differed.
+
+**What to build**
+A small, documented normalization step applied to both the source and the quote before matching
+that strips Markdown emphasis markers (`**`, `__`, `*`, `_`) and backticks. Decide what to include
+and what not to, and explain in the PR why it does not weaken the check: a fabricated quote must
+still be rejected.
+
+**Acceptance criteria**
+- [ ] A test using the real source text above and the real removed quote, which now matches.
+- [ ] A test that a fabricated quote is still rejected, and that removing formatting characters
+      cannot make two different sentences match.
+- [ ] The list of ignored characters is in one place, with a comment, and the README's
+      "What grounded means here" section mentions it.
+
+**Out of scope**
+Fuzzy or edit-distance matching. Semantic matching. Checking that a claim's wording is supported
+by its quote.
+
+**Verification**
+`npm test`.
